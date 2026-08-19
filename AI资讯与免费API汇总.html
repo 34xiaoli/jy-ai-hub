@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>免费 AI 资讯 & 免费 API 资源中心</title>
+<style>
+  :root {
+    --fg:#1f2933; --muted:#5b6776; --bg:#ffffff; --panel:#fbfcfe; --accent:#2563eb;
+    --code:#f4f6f8; --border:#e4e7eb; --chip:#eef3ff; --chip-fg:#2563eb;
+    --badge-green:#16a34a; --badge-green-bg:#dcfce7;
+    --badge-amber:#b45309; --badge-amber-bg:#fef3c7;
+    --badge-blue:#1d4ed8; --badge-blue-bg:#dbeafe;
+    --badge-purple:#7c3aed; --badge-purple-bg:#ede9fe;
+    --topbar-h:58px; --chipbar-h:46px;
+  }
+  [data-theme="dark"] {
+    --fg:#e6eaf0; --muted:#9aa6b5; --bg:#0f141b; --panel:#161c26; --accent:#6ea8fe;
+    --code:#11161f; --border:#283142; --chip:#1d2735; --chip-fg:#9ec5ff;
+    --badge-green:#4ade80; --badge-green-bg:#13351f;
+    --badge-amber:#fbbf24; --badge-amber-bg:#3a2c0c;
+    --badge-blue:#93c5fd; --badge-blue-bg:#16263f;
+    --badge-purple:#c4b5fd; --badge-purple-bg:#2a2140;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+         color: var(--fg); background: var(--bg); margin: 0; line-height: 1.7; }
+
+  /* Top bar */
+  .topbar { position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+            display: flex; align-items: center; gap: 14px; padding: 0 18px;
+            background: var(--panel); border-bottom: 1px solid var(--border); z-index: 30; }
+  .topbar .brand { font-weight: 700; font-size: 16px; color: var(--accent); white-space: nowrap; }
+  .topbar .brand small { color: var(--muted); font-weight: 400; font-size: 12px; display:block; }
+  .search { flex: 1; max-width: 520px; position: relative; }
+  .search input { width: 100%; padding: 9px 12px 9px 34px; border: 1px solid var(--border);
+                  border-radius: 8px; background: var(--bg); color: var(--fg); font-size: 14px; outline: none; }
+  .search input:focus { border-color: var(--accent); }
+  .search::before { content: "🔍"; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; opacity:.6; }
+  .theme-btn { border: 1px solid var(--border); background: var(--bg); color: var(--fg);
+               border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+  .theme-btn:hover { border-color: var(--accent); }
+
+  /* Chip filter bar */
+  .chipbar { position: fixed; top: var(--topbar-h); left: 0; right: 0; height: var(--chipbar-h);
+             display: flex; align-items: center; gap: 8px; padding: 0 18px; overflow-x: auto;
+             background: var(--panel); border-bottom: 1px solid var(--border); z-index: 29; }
+  .chipbar .stat { color: var(--muted); font-size: 12.5px; white-space: nowrap; margin-right: 4px; }
+  .chip { border: 1px solid var(--border); background: var(--chip); color: var(--chip-fg);
+          border-radius: 999px; padding: 5px 12px; font-size: 12.5px; cursor: pointer; white-space: nowrap; user-select: none; }
+  .chip:hover { border-color: var(--accent); }
+  .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .chip .cnt { opacity: .7; font-size: 11px; }
+
+  /* Sidebar TOC */
+  .sidebar { position: fixed; top: calc(var(--topbar-h) + var(--chipbar-h)); left: 0; width: 270px;
+             height: calc(100vh - var(--topbar-h) - var(--chipbar-h)); overflow-y: auto;
+             border-right: 1px solid var(--border); background: var(--panel); padding: 20px 16px; }
+  .sidebar h4 { margin: 0 0 10px; font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  .sidebar ul { list-style: none; margin: 0; padding: 0; }
+  .sidebar li { margin: 2px 0; }
+  .sidebar li a { display: block; padding: 5px 8px; border-radius: 6px; color: var(--muted);
+                  text-decoration: none; font-size: 13.5px; }
+  .sidebar li a:hover { background: var(--chip); color: var(--accent); }
+  .sidebar li.toc-h2 a { font-weight: 600; color: var(--fg); }
+  .sidebar li.toc-h3 a { padding-left: 22px; font-size: 13px; }
+
+  /* Main content */
+  .content { margin-left: 270px; margin-top: calc(var(--topbar-h) + var(--chipbar-h));
+             padding: 28px 36px 90px; max-width: 1040px; }
+  h1 { font-size: 26px; border-bottom: 3px solid var(--accent); padding-bottom: 10px; }
+  h2 { font-size: 21px; margin-top: 40px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  h3 { font-size: 17px; margin-top: 28px; }
+  blockquote { border-left: 4px solid var(--accent); background: var(--chip); margin: 14px 0; padding: 11px 15px; color: var(--muted); border-radius: 4px; font-size: 13.5px; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code); font-weight: 600; }
+  tr:nth-child(even) td { background: var(--panel); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { background: var(--code); padding: 2px 6px; border-radius: 4px; font-size: 12.5px; }
+  pre { background: #0f172a; color: #e2e8f0; padding: 14px 16px; border-radius: 8px; overflow-x: auto; position: relative; }
+  pre code { background: none; padding: 0; color: inherit; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+  .foot { margin-top: 44px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 14px; }
+
+  /* Tag pills */
+  .tag { display: inline-block; border-radius: 6px; padding: 2px 8px; margin: 2px 3px 2px 0;
+         font-size: 11.5px; line-height: 1.6; white-space: nowrap; }
+  .tag.green { color: var(--badge-green); background: var(--badge-green-bg); }
+  .tag.amber { color: var(--badge-amber); background: var(--badge-amber-bg); }
+  .tag.blue  { color: var(--badge-blue);  background: var(--badge-blue-bg); }
+  .tag.purple{ color: var(--badge-purple);background: var(--badge-purple-bg); }
+
+  /* Copy button */
+  .copy-btn { position: absolute; top: 8px; right: 10px; border: 1px solid #334155; background: #1e293b;
+              color: #cbd5e1; border-radius: 6px; padding: 3px 9px; font-size: 12px; cursor: pointer; }
+  .copy-btn:hover { background: #334155; }
+
+  .to-top { position: fixed; right: 20px; bottom: 22px; width: 42px; height: 42px; border-radius: 50%;
+            border: 1px solid var(--border); background: var(--panel); color: var(--accent); cursor: pointer;
+            font-size: 18px; display: none; z-index: 40; }
+  .to-top.show { display: block; }
+
+  .no-result { color: var(--muted); padding: 30px; text-align: center; display: none; }
+
+  @media (max-width: 980px) {
+    .sidebar { display: none; }
+    .content { margin-left: 0; padding: 22px 16px 70px; }
+    .topbar .brand small { display: none; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">免费 AI 资源中心<small>资讯 · 免费 API · 可筛选</small></div>
+  <div class="search"><input id="q" type="text" placeholder="搜索模型 / API / 场景 / 标签…"></div>
+  <button class="theme-btn" id="theme">🌙 深色</button>
+</header>
+<div class="chipbar" id="chipbar"><span class="stat" id="stat"></span></div>
+<nav class="sidebar"><h4>目录</h4><ul>
+<li><a href="#ai">一、免费 AI 资讯 / 资源</a><ul>
+<li><a href="#11">1.1 免费资讯与新闻源（聚合）</a></li>
+<li><a href="#12">1.2 免费学习资源</a></li>
+<li><a href="#13-ai-app">1.3 免费可用的 AI 工具 / 平台（网页 / App）</a></li>
+<li><a href="#14">1.4 开源与本地大模型 + 部署工具</a></li>
+<li><a href="#15">1.5 合规提示（结合企业 / 事务所场景）</a></li>
+</ul>
+</li>
+<li><a href="#api">二、免费 API 汇总</a><ul>
+<li><a href="#a-ai-api">A. AI / 大模型免费 API</a></li>
+<li><a href="#b-api">B. 通用免费 API</a></li>
+</ul>
+</li>
+<li><a href="#api_2">三、免费 API 导航（分类速查，点击跳转）</a></li>
+<li><a href="#_5">四、每日更新</a></li>
+</ul></nav>
+<main class="content">
+<h1 id="ai-api">免费 AI 资讯 &amp; 免费 API 资源中心</h1>
+<blockquote>
+<p><strong>编制说明</strong>
+- 编制日期：2026-07-13 ｜ <strong>最近全量核验：2026-07-13</strong>
+- 内容来源：<strong>混合</strong>——核心清单基于知识库整理（稳定可靠），关键免费额度/政策已于 2026-07-13 联网核验（来源见各条目链接）。
+- 本文档中所有蓝色文字均为<strong>可点击跳转链接</strong>，点击会在新标签页打开对应官网 / 文档 / 控制台 / 定价页。
+- <strong>标签说明</strong>（用于筛选）：<code>免费</code>=完全免费/开源 ｜ <code>免费档</code>=有限免费额度 ｜ <code>Freemium</code>=免费+付费 ｜ <code>本地</code>=可本机部署 ｜ <code>免Key</code>=无需密钥 ｜ <code>API Key</code>=需密钥 ｜ <code>登录</code>=需账号 ｜ <code>多模态</code>/<code>长上下文</code>/<code>低延迟</code>/<code>中文强</code>/<code>代码强</code>/<code>CORS</code>(前端可用)/<code>国内</code>(数据驻留友好)/<code>离线</code>
+- HTML 预览版支持<strong>顶部搜索 + 标签筛选 + 深色模式</strong>；免费档变动频繁，落地前以官方文档或文末「每日更新」区为准。
+- 适用对象：AI 转型 / 开发 / 数据分析 / 事务所数字化场景。</p>
+</blockquote>
+<hr />
+<h2 id="ai">一、免费 AI 资讯 / 资源</h2>
+<blockquote>
+<p>最近核验：2026-07-13</p>
+</blockquote>
+<h3 id="11">1.1 免费资讯与新闻源（聚合）</h3>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>类型</th>
+<th>免费</th>
+<th>说明 / 链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://news.ycombinator.com">Hacker News</a></td>
+<td>社区资讯</td>
+<td>免费</td>
+<td>全球技术/AI 前沿讨论，Y Combinator 运营</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/list/cs.AI/recent">arXiv cs.AI / cs.CL</a></td>
+<td>论文预印本</td>
+<td>免费</td>
+<td>最新研究成果，几乎每日更新；<a href="https://arxiv.org/list/cs.CL/recent">cs.CL 自然语言处理</a></td>
+</tr>
+<tr>
+<td><a href="https://www.deeplearning.ai/the-batch">The Batch</a></td>
+<td>邮件周刊</td>
+<td>免费</td>
+<td>DeepLearning.AI 出品，吴恩达主编的 AI 周报；<a href="https://www.deeplearning.ai/newsletter">订阅</a></td>
+</tr>
+<tr>
+<td><a href="https://tldr.tech/ai">TLDR AI</a></td>
+<td>每日简报</td>
+<td>免费</td>
+<td>工程师向，3 分钟速览 AI/ML 要点</td>
+</tr>
+<tr>
+<td><a href="https://www.therundown.ai">The Rundown AI</a></td>
+<td>每日简报</td>
+<td>免费</td>
+<td>最大 AI 日报（2M+），偏「今天怎么用」</td>
+</tr>
+<tr>
+<td><a href="https://bensbites.com">Ben's Bites</a></td>
+<td>邮件日报</td>
+<td>免费</td>
+<td>创始人/构建者视角，AI 创业生态</td>
+</tr>
+<tr>
+<td><a href="https://importai.substack.com">Import AI</a></td>
+<td>邮件周刊</td>
+<td>免费</td>
+<td>Jack Clark（Anthropic 联创）写前沿研究+政策</td>
+</tr>
+<tr>
+<td><a href="https://www.latent.space">Latent Space</a></td>
+<td>工程化资讯</td>
+<td>免费</td>
+<td>AI Engineer 向：Agent/RAG/Infra/推理</td>
+</tr>
+<tr>
+<td><a href="https://www.jiqizhixin.com">机器之心</a></td>
+<td>中文媒体</td>
+<td>免费</td>
+<td>国内 AI 资讯/论文解读；<a href="https://syncedreview.com">Synced</a></td>
+</tr>
+<tr>
+<td><a href="https://www.qbitai.com">量子位</a></td>
+<td>中文媒体</td>
+<td>免费</td>
+<td>前沿模型与产品动态</td>
+</tr>
+<tr>
+<td><a href="https://marktechpost.com">MarkTechPost</a></td>
+<td>网站+日报</td>
+<td>免费</td>
+<td>开源发布、教程密集</td>
+</tr>
+<tr>
+<td><a href="https://www.reddit.com/r/LocalLLaMA">r/LocalLLaMA</a></td>
+<td>社区论坛</td>
+<td>免费</td>
+<td>本地部署/小模型一手信号</td>
+</tr>
+<tr>
+<td><a href="https://a16z.com/ai">a16z tech blog</a></td>
+<td>投资机构洞察</td>
+<td>免费</td>
+<td>AI 产业趋势与投研观点</td>
+</tr>
+<tr>
+<td><a href="https://www.promptingguide.ai">Prompt Engineering Guide</a></td>
+<td>教程</td>
+<td>免费</td>
+<td>提示工程开源指南（中英文）</td>
+</tr>
+<tr>
+<td><a href="https://github.com/trending/python?since=daily">GitHub Trending</a></td>
+<td>项目榜</td>
+<td>免费</td>
+<td>追踪热门开源 AI 项目</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12">1.2 免费学习资源</h3>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>内容</th>
+<th>链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://huggingface.co/learn">Hugging Face Courses</a></td>
+<td>Transformer / Diffusers / 推理部署</td>
+<td><a href="https://huggingface.co/learn">课程主页</a></td>
+</tr>
+<tr>
+<td><a href="https://www.deeplearning.ai/short-courses">DeepLearning.AI 短课程</a></td>
+<td>大模型应用、RAG、Agent</td>
+<td><a href="https://www.deeplearning.ai/short-courses">短课程列表</a></td>
+</tr>
+<tr>
+<td><a href="https://modelscope.cn">ModelScope 魔搭社区</a></td>
+<td>中文模型/数据集库、Notebook 实验</td>
+<td><a href="https://modelscope.cn/models">模型库</a> · <a href="https://modelscope.cn/datasets">数据集</a></td>
+</tr>
+<tr>
+<td><a href="https://huggingface.co/models">Hugging Face Hub</a></td>
+<td>100 万+ 开源模型与数据集</td>
+<td><a href="https://huggingface.co/models">模型</a> · <a href="https://huggingface.co/datasets">数据集</a></td>
+</tr>
+<tr>
+<td><a href="https://www.kaggle.com">Kaggle</a></td>
+<td>数据集 + 免费 GPU Notebook</td>
+<td><a href="https://www.kaggle.com/code">Notebooks</a> · <a href="https://www.kaggle.com/competitions">竞赛</a></td>
+</tr>
+<tr>
+<td><a href="https://aistudio.google.com">Google AI Studio</a></td>
+<td>Gemini 免费体验与调试</td>
+<td><a href="https://aistudio.google.com">进入 Studio</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/anthropics/anthropic-cookbook">Anthropic Cookbook</a></td>
+<td>Claude 集成示例</td>
+<td><a href="https://github.com/anthropics/anthropic-cookbook">GitHub</a></td>
+</tr>
+<tr>
+<td><a href="https://docs.langchain.com">LangChain 文档</a></td>
+<td>Agent / RAG 框架</td>
+<td><a href="https://docs.langchain.com">Docs</a> · <a href="https://github.com/langchain-ai/langchain">GitHub</a></td>
+</tr>
+<tr>
+<td><a href="https://docs.llamaindex.ai">LlamaIndex 文档</a></td>
+<td>数据框架 / RAG</td>
+<td><a href="https://docs.llamaindex.ai">Docs</a></td>
+</tr>
+<tr>
+<td><a href="https://docs.dify.ai">Dify 文档</a></td>
+<td>开源 LLMOps / 可视化 Agent 编排</td>
+<td><a href="https://docs.dify.ai">Docs</a> · <a href="https://github.com/langgenius/dify">GitHub</a></td>
+</tr>
+<tr>
+<td><a href="https://www.coursera.org/learn/ai-for-everyone">吴恩达《AI For Everyone》</a></td>
+<td>非技术向 AI 通识</td>
+<td><a href="https://www.coursera.org/learn/ai-for-everyone">Coursera</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="13-ai-app">1.3 免费可用的 AI 工具 / 平台（网页 / App）</h3>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>免费范围</th>
+<th>标签</th>
+<th>链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://chat.openai.com">ChatGPT 免费版</a></td>
+<td>GPT-4o 级别对话、有限额度</td>
+<td>免费档 · 登录 · 多模态</td>
+<td><a href="https://chat.openai.com">网页</a></td>
+</tr>
+<tr>
+<td><a href="https://gemini.google.com">Gemini 免费版</a></td>
+<td>Gemini 2.5 Flash/Pro 网页版</td>
+<td>免费档 · 登录 · 多模态 · 长上下文</td>
+<td><a href="https://gemini.google.com">网页</a></td>
+</tr>
+<tr>
+<td><a href="https://claude.ai">Claude（claude.ai Free）</a></td>
+<td>网页对话，非 API</td>
+<td>免费档 · 登录 · 长上下文</td>
+<td><a href="https://claude.ai">网页</a></td>
+</tr>
+<tr>
+<td><a href="https://chat.deepseek.com">DeepSeek 网页/App</a></td>
+<td>个人用户无限免费对话</td>
+<td>免费 · 登录 · 中文强 · 代码强 · 国内</td>
+<td><a href="https://chat.deepseek.com">对话页</a></td>
+</tr>
+<tr>
+<td><a href="https://poe.com">Poe</a></td>
+<td>聚合多模型，含免费档</td>
+<td>免费档 · 登录 · 多模态</td>
+<td><a href="https://poe.com">网页</a></td>
+</tr>
+<tr>
+<td><a href="https://www.perplexity.ai">Perplexity</a></td>
+<td>AI 搜索，免费档可用</td>
+<td>免费档 · 登录 · 多模态</td>
+<td><a href="https://www.perplexity.ai">网页</a></td>
+</tr>
+<tr>
+<td><a href="https://yuanbao.tencent.com">元宝（腾讯）</a></td>
+<td>中文对话，免费</td>
+<td>免费 · 登录 · 中文强 · 国内</td>
+<td><a href="https://yuanbao.tencent.com">网页</a></td>
+</tr>
+<tr>
+<td><a href="https://tongyi.aliyun.com">通义千问</a></td>
+<td>国内大模型，免费档</td>
+<td>免费档 · 登录 · 中文强 · 国内</td>
+<td><a href="https://tongyi.aliyun.com">网页</a></td>
+</tr>
+<tr>
+<td><a href="https://chat.zhipuai.cn">智谱清言 GLM</a></td>
+<td>国内大模型，免费档</td>
+<td>免费档 · 登录 · 中文强 · 国内</td>
+<td><a href="https://chat.zhipuai.cn">网页</a></td>
+</tr>
+<tr>
+<td><a href="https://kimi.moonshot.cn">Kimi（月之暗面）</a></td>
+<td>长文本对话，免费档</td>
+<td>免费档 · 登录 · 长上下文 · 中文强 · 国内</td>
+<td><a href="https://kimi.moonshot.cn">网页</a></td>
+</tr>
+<tr>
+<td><a href="https://futurepedia.io">Futurepedia</a></td>
+<td>4000+ AI 工具发现/筛选</td>
+<td>免费 · 发现</td>
+<td><a href="https://futurepedia.io">工具导航</a></td>
+</tr>
+<tr>
+<td><a href="https://www.toolify.ai">Toolify</a></td>
+<td>AI 工具排名/分类</td>
+<td>免费 · 发现</td>
+<td><a href="https://www.toolify.ai">工具导航</a></td>
+</tr>
+<tr>
+<td><a href="https://theresanaiforthat.com">There's An AI For That</a></td>
+<td>按任务找 AI 工具</td>
+<td>免费 · 发现</td>
+<td><a href="https://theresanaiforthat.com">工具导航</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="14">1.4 开源与本地大模型 + 部署工具</h3>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>代表</th>
+<th>说明 / 链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>开源权重模型</td>
+<td>Llama 3.x、Qwen2.5/3、DeepSeek V3/R1、Gemma 2、Mistral</td>
+<td>可本地部署，商用需注意许可证：<a href="https://www.llama.com/licensing">Llama 社区许可</a> · <a href="https://github.com/QwenLM/Qwen3/blob/main/LICENSE">Qwen 许可</a> · <a href="https://github.com/deepseek-ai/DeepSeek-V3/blob/main/LICENSE-MODEL">DeepSeek 许可</a></td>
+</tr>
+<tr>
+<td>本地推理引擎</td>
+<td><strong>Ollama</strong>（最易用）、LM Studio（GUI）、vLLM（高吞吐）、llama.cpp（CPU/低配）</td>
+<td>完全免费、数据不出本机：<a href="https://ollama.com">Ollama</a> · <a href="https://lmstudio.ai">LM Studio</a> · <a href="https://docs.vllm.ai">vLLM</a> · <a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a></td>
+</tr>
+<tr>
+<td>向量库 / RAG</td>
+<td>Chroma、FAISS、Qdrant、Weaviate</td>
+<td>本地知识库/检索增强基础组件：<a href="https://www.trychroma.com">Chroma</a> · <a href="https://github.com/facebookresearch/faiss">FAISS</a> · <a href="https://qdrant.tech">Qdrant</a> · <a href="https://weaviate.io">Weaviate</a></td>
+</tr>
+<tr>
+<td>编排框架</td>
+<td>LangChain、LlamaIndex、Dify</td>
+<td>快速搭建 Agent / RAG 应用：<a href="https://docs.langchain.com">LangChain</a> · <a href="https://docs.llamaindex.ai">LlamaIndex</a> · <a href="https://dify.ai">Dify</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>提示</strong>：事务所、审计、司法会计鉴定等场景涉及客户敏感数据，<strong>本地部署（Ollama + vLLM）是首选</strong>，可避免数据出境与第三方留存风险。</p>
+</blockquote>
+<h3 id="15">1.5 合规提示（结合企业 / 事务所场景）</h3>
+<ul>
+<li><strong>数据出境</strong>：使用境外大模型 API（OpenAI、Anthropic、Google）时，输入数据会离开中国境内存放/训练用途（免费档常标注「用于改进产品」）。涉密或客户数据务必走本地模型或国内合规厂商（<a href="https://platform.deepseek.com"> DeepSeek</a> / <a href="https://open.bigmodel.cn"> 智谱</a> / <a href="https://help.aliyun.com/zh/model-studio/"> 通义</a> ）。</li>
+<li><strong>数据脱敏</strong>：调用外部 API 前，对姓名、身份证、银行账号、财报明细等做脱敏（参考你已有的 <code>audit-desensitizer</code> 工具思路）。</li>
+<li><strong>直播合规</strong>：如「蜂医」3D 虚拟形象直播项目，需遵守抖音等平台医疗/金融内容合规要求，避免无资质荐股、荐医。</li>
+<li><strong>API Key 安全</strong>：所有 Key 用环境变量 / 密钥管理（如 <a href="https://github.com/motdotla/dotenv">dotenv</a> / <a href="https://www.vaultproject.io">Vault</a>），禁止硬编码进仓库；免费额度被刷也会产生成本或封号。</li>
+<li><strong>许可证</strong>：开源模型商用前核对 LICENSE（Llama / Qwen / DeepSeek 各有商用条款）。</li>
+</ul>
+<hr />
+<h2 id="api">二、免费 API 汇总</h2>
+<blockquote>
+<p>字段说明：<strong>免费额度</strong> = 不花钱能用到什么；<strong>关键限制</strong> = 速率/参数上限；<strong>标签</strong> = 用于筛选的结构化属性；<strong>链接</strong> = 官网/文档/控制台/定价 多入口。</p>
+</blockquote>
+<h3 id="a-ai-api">A. AI / 大模型免费 API</h3>
+<blockquote>
+<p>最近核验：2026-07-13</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>免费额度 / 政策</th>
+<th>关键限制</th>
+<th>适用场景</th>
+<th>标签</th>
+<th>链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Google Gemini</strong></td>
+<td>免费层免费用 2.5 Flash / Pro / Flash-Lite；无需信用卡</td>
+<td>2.5 Flash：10 RPM / 250 RPD；2.5 Pro：5 RPM / 100 RPD；Flash-Lite：15 RPM / 1000 RPD；共享 1M TPM，1M token 上下文</td>
+<td>多模态、长文档、联网检索（Grounding）</td>
+<td>免费档 · 免Key(Studio) · API Key · 多模态 · 长上下文</td>
+<td><a href="https://ai.google.dev">文档</a> · <a href="https://aistudio.google.com">AI Studio</a> · <a href="https://ai.google.dev/pricing">定价</a> · <a href="https://ai.google.dev/api">API 参考</a></td>
+</tr>
+<tr>
+<td><strong>Groq</strong></td>
+<td>完全免费，无需信用卡；OpenAI 兼容</td>
+<td>多数模型 30 RPM / 14,400 RPD；组织级限流</td>
+<td>超低延迟推理（~2600 tok/s）、原型</td>
+<td>免费 · 免Key(注册) · API Key · 低延迟 · 代码强</td>
+<td><a href="https://console.groq.com">控制台</a> · <a href="https://console.groq.com/docs">文档</a> · <a href="https://console.groq.com/docs/models">模型列表</a></td>
+</tr>
+<tr>
+<td><strong>DeepSeek</strong></td>
+<td>新账号赠 <strong>500 万 tokens / 30 天</strong>，无需信用卡；网页对话永久免费</td>
+<td>免费额度期与付费同限速（尽力而为，无硬上限）；<strong>服务器在中国（数据驻留需注意）</strong></td>
+<td>高性价比中文推理、代码</td>
+<td>免费档 · API Key · 中文强 · 代码强 · 国内</td>
+<td><a href="https://platform.deepseek.com">平台</a> · <a href="https://api-docs.deepseek.com">API 文档</a> · <a href="https://api-docs.deepseek.com/quick_start/pricing">定价</a></td>
+</tr>
+<tr>
+<td><strong>OpenAI</strong></td>
+<td>新账号赠 <strong>$5 额度 / 3 个月</strong>；无需信用卡起用</td>
+<td>Free 层限速低（GPT-4o 约 3 RPM）；<strong>GPT-5 不在免费层</strong></td>
+<td>GPT 生态、函数调用、图像(DALL·E)</td>
+<td>免费档 · API Key · 多模态 · 代码强</td>
+<td><a href="https://platform.openai.com">平台</a> · <a href="https://platform.openai.com/docs">文档</a> · <a href="https://openai.com/api/pricing">定价</a> · <a href="https://cookbook.openai.com">Cookbook</a></td>
+</tr>
+<tr>
+<td><strong>Anthropic Claude</strong></td>
+<td>新账号电话验证后赠 <strong>$5 额度 / 14 天</strong>；<strong>无永久免费 API</strong>；claude.ai 网页免费</td>
+<td>Free/Build 层约 5 RPM；额度 14 天过期</td>
+<td>复杂推理、长文、Agent</td>
+<td>免费档 · API Key · 长上下文 · 代码强</td>
+<td><a href="https://console.anthropic.com">控制台</a> · <a href="https://docs.anthropic.com">文档</a> · <a href="https://www.anthropic.com/pricing">定价</a> · <a href="https://github.com/anthropics/anthropic-cookbook">Cookbook</a></td>
+</tr>
+<tr>
+<td><strong>Hugging Face Inference</strong></td>
+<td>Serverless 推理免费，无需信用卡</td>
+<td>~300 请求/小时，模型 &lt; ~10B 参数；冷启动 10–30s</td>
+<td>10 万+ 开源模型原型、Embedding、分类</td>
+<td>免费 · API Key · 多模态</td>
+<td><a href="https://huggingface.co/docs/api-inference">API 文档</a> · <a href="https://huggingface.co/models">模型库</a> · <a href="https://huggingface.co/docs/inference-providers">Inference Providers</a></td>
+</tr>
+<tr>
+<td><strong>Mistral / Together / Fireworks</strong></td>
+<td>均有免费或极廉价档（Mistral Le Chat 免费；Together/Fireworks 送试用额度）</td>
+<td>各厂商不同，按官网</td>
+<td>开源模型托管推理</td>
+<td>免费档 · API Key · 多模态</td>
+<td><a href="https://mistral.ai">Mistral</a> · <a href="https://www.together.ai">Together</a> · <a href="https://fireworks.ai">Fireworks</a></td>
+</tr>
+<tr>
+<td><strong>Ollama（本地）</strong></td>
+<td>完全免费，无限</td>
+<td>受本机算力限制</td>
+<td>涉密/离线/合规场景</td>
+<td>免费 · 本地 · 离线 · 国内</td>
+<td><a href="https://ollama.com">官网</a> · <a href="https://ollama.com/library">模型库</a> · <a href="https://github.com/ollama/ollama">GitHub</a></td>
+</tr>
+<tr>
+<td><strong>智谱 BigModel</strong></td>
+<td>新用户免费额度（GLM 系列）</td>
+<td>按官网限速</td>
+<td>中文推理、合规场景</td>
+<td>免费档 · API Key · 中文强 · 国内</td>
+<td><a href="https://open.bigmodel.cn">开放平台</a> · <a href="https://open.bigmodel.cn/dev/api">文档</a></td>
+</tr>
+<tr>
+<td><strong>通义千问（DashScope）</strong></td>
+<td>新用户免费额度（Qwen 系列）</td>
+<td>按官网限速</td>
+<td>中文推理、多模态</td>
+<td>免费档 · API Key · 中文强 · 多模态 · 国内</td>
+<td><a href="https://help.aliyun.com/zh/model-studio/">文档</a> · <a href="https://dashscope.console.aliyun.com">控制台</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>调用示例（OpenAI 兼容，Groq / DeepSeek / OpenAI 通用）</strong></p>
+<pre><code class="language-python"># 以 Groq 为例，OpenAI SDK 直接复用（base_url 换掉即可）
+from openai import OpenAI
+
+client = OpenAI(
+    base_url=&quot;https://api.groq.com/openai/v1&quot;,
+    api_key=&quot;YOUR_GROQ_KEY&quot;,
+)
+
+resp = client.chat.completions.create(
+    model=&quot;llama-3.3-70b-versatile&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;用一句话解释什么是 RAG。&quot;}],
+)
+print(resp.choices[0].message.content)
+</code></pre>
+<pre><code class="language-bash"># Gemini 最小调用（REST，需 API Key）
+curl &quot;https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;contents&quot;:[{&quot;parts&quot;:[{&quot;text&quot;:&quot;你好&quot;}]}]}'
+</code></pre>
+<h3 id="b-api">B. 通用免费 API</h3>
+<h4 id="_1">天气</h4>
+<blockquote>
+<p>最近核验：2026-07-13</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>免费额度</th>
+<th>限制</th>
+<th>适用场景</th>
+<th>标签</th>
+<th>链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Open-Meteo</strong></td>
+<td>非商用免注册、免 Key</td>
+<td>~10,000 次/天（非商用）；需要署名(CC BY 4.0)</td>
+<td>全球预报/历史/空气质量，无需 Key</td>
+<td>免费 · 免Key · CORS</td>
+<td><a href="https://open-meteo.com">官网</a> · <a href="https://open-meteo.com/en/docs">API 文档</a></td>
+</tr>
+<tr>
+<td><strong>和风天气 QWeather</strong></td>
+<td>个人/非商用 <strong>1000 次/天</strong></td>
+<td>免费开发版；实名；基础天气数据</td>
+<td>国内天气、灾害预警、空气质量</td>
+<td>免费档 · API Key · 国内</td>
+<td><a href="https://dev.qweather.com">开发文档</a> · <a href="https://console.qweather.com">控制台</a></td>
+</tr>
+<tr>
+<td><strong>OpenWeatherMap</strong></td>
+<td>免费档 1000 次/天（旧 5 万/月政策已收紧）</td>
+<td>需 Key</td>
+<td>全球天气</td>
+<td>免费档 · API Key · CORS</td>
+<td><a href="https://openweathermap.org/api">API</a> · <a href="https://openweathermap.org/price">定价</a></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># Open-Meteo：无需 Key，直接拼参数
+curl &quot;https://api.open-meteo.com/v1/forecast?latitude=39.9&amp;longitude=116.4&amp;current=temperature_2m,wind_speed_10m&quot;
+</code></pre>
+<h4 id="_2">地图 / 地理编码</h4>
+<blockquote>
+<p>最近核验：2026-07-13</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>免费额度</th>
+<th>限制</th>
+<th>适用场景</th>
+<th>标签</th>
+<th>链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Nominatim (OSM)</strong></td>
+<td>完全免费，无需 Key</td>
+<td>约 1 请求/秒；需 UA 与合理使用</td>
+<td>地名↔经纬度、全球搜索</td>
+<td>免费 · 免Key · CORS</td>
+<td><a href="https://nominatim.org">官网</a> · <a href="https://operations.osmfoundation.org/policies/nominatim">使用政策</a></td>
+</tr>
+<tr>
+<td><strong>高德地图</strong></td>
+<td>个人开发者 <strong>500 万次/月</strong></td>
+<td>需 Key</td>
+<td>国内地图、路径、POI</td>
+<td>免费档 · API Key · 国内</td>
+<td><a href="https://lbs.amap.com">开放平台</a> · <a href="https://lbs.amap.com/api/javascript-api-v2/documentation">文档</a></td>
+</tr>
+<tr>
+<td><strong>百度地图</strong></td>
+<td>免费配额（按服务）</td>
+<td>需 Key</td>
+<td>国内地图</td>
+<td>免费档 · API Key · 国内</td>
+<td><a href="https://lbsyun.baidu.com">开放平台</a> · <a href="https://lbsyun.baidu.com/index.php?title=webapi">文档</a></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># Nominatim 地理编码（务必带 User-Agent）
+curl -H &quot;User-Agent: MyApp/1.0&quot; &quot;https://nominatim.openstreetmap.org/search?q=郑州&amp;format=json&amp;limit=1&quot;
+</code></pre>
+<h4 id="_3">翻译</h4>
+<blockquote>
+<p>最近核验：2026-07-13</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>免费额度</th>
+<th>限制</th>
+<th>适用场景</th>
+<th>标签</th>
+<th>链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MyMemory</strong></td>
+<td>匿名 <strong>5000 字符/天</strong>（邮箱可 5 万/天）</td>
+<td>无需注册/Key</td>
+<td>快速翻译验证、个人项目</td>
+<td>免费 · 免Key · CORS</td>
+<td><a href="https://mymemory.translated.net">官网</a> · <a href="https://mymemory.translated.net/doc/usagelimits.php">API</a></td>
+</tr>
+<tr>
+<td><strong>LibreTranslate</strong></td>
+<td>自建无限免费</td>
+<td>需自部署服务器</td>
+<td>数据敏感、离线翻译</td>
+<td>免费 · 本地 · 离线</td>
+<td><a href="https://libretranslate.com">官网</a> · <a href="https://github.com/LibreTranslate/LibreTranslate">GitHub</a></td>
+</tr>
+<tr>
+<td><strong>DeepL API Free</strong></td>
+<td>50 万字符/月</td>
+<td>需信用卡（含免费档）</td>
+<td>欧洲语种高质量翻译</td>
+<td>免费档 · API Key</td>
+<td><a href="https://www.deepl.com/pro-api">DeepL API</a> · <a href="https://developers.deepl.com">文档</a></td>
+</tr>
+<tr>
+<td><strong>百度翻译 API</strong></td>
+<td>200 万字符/月</td>
+<td>需 Key</td>
+<td>中文生态翻译</td>
+<td>免费档 · API Key · 国内</td>
+<td><a href="https://fanyi-api.baidu.com">开放平台</a> · <a href="https://fanyi-api.baidu.com/product/11">文档</a></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># MyMemory：无需 Key
+curl &quot;https://api.mymemory.translated.net/get?q=Hello%20World&amp;langpair=en|zh&quot;
+</code></pre>
+<h4 id="_4">金融 / 行情</h4>
+<blockquote>
+<p>最近核验：2026-07-13</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>免费额度</th>
+<th>限制</th>
+<th>适用场景</th>
+<th>标签</th>
+<th>链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tushare</strong></td>
+<td>注册积分制（约 100 积分起，签到/任务加成）</td>
+<td>按积分限频；基础行情需积分</td>
+<td>A 股历史/基本面数据</td>
+<td>免费档 · 登录 · 国内</td>
+<td><a href="https://tushare.pro">官网</a> · <a href="https://tushare.pro/document/1">文档</a></td>
+</tr>
+<tr>
+<td><strong>Alpha Vantage</strong></td>
+<td><strong>25 次/天，5 次/分钟</strong></td>
+<td>需 Key；股票/外汇/加密/技术指标</td>
+<td>美股/全球行情、量化原型</td>
+<td>免费档 · API Key · CORS</td>
+<td><a href="https://www.alphavantage.co">官网</a> · <a href="https://www.alphavantage.co/documentation">文档</a></td>
+</tr>
+<tr>
+<td><strong>腾讯自选股 (westock)</strong></td>
+<td>免费（本地/接口）</td>
+<td>—</td>
+<td>A 股实时/资讯</td>
+<td>免费 · 国内</td>
+<td>WorkBuddy <code>westock</code> 技能</td>
+</tr>
+<tr>
+<td><strong>CoinGecko</strong></td>
+<td>免费档 ~10–30 次/分</td>
+<td>需 Key（高级）</td>
+<td>加密货币行情</td>
+<td>免费档 · API Key · CORS</td>
+<td><a href="https://www.coingecko.com/en/api">官网</a> · <a href="https://docs.coingecko.com">文档</a></td>
+</tr>
+<tr>
+<td><strong>exchangerate.host</strong></td>
+<td>免费档有限</td>
+<td>汇率数据</td>
+<td>汇率换算</td>
+<td>免费 · 免Key · CORS</td>
+<td><a href="https://exchangerate.host">官网</a> · <a href="https://exchangerate.host/support">文档</a></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># Alpha Vantage：日线行情（需 YOUR_KEY）
+curl &quot;https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&amp;symbol=IBM&amp;apikey=YOUR_KEY&quot;
+</code></pre>
+<h4 id="ocr">OCR / 图像</h4>
+<blockquote>
+<p>最近核验：2026-07-13</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>免费额度</th>
+<th>限制</th>
+<th>适用场景</th>
+<th>标签</th>
+<th>链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PaddleOCR</strong></td>
+<td>本地完全免费</td>
+<td>需本地部署</td>
+<td>票据/表格/文档识别（中文强）</td>
+<td>免费 · 本地 · 离线 · 中文强</td>
+<td><a href="https://github.com/PaddlePaddle/PaddleOCR">GitHub</a> · <a href="https://paddleocr.bj.bcebos.com/ppocrv3/PP-OCRv3_introduction.pdf">文档</a></td>
+</tr>
+<tr>
+<td><strong>百度 OCR</strong></td>
+<td>免费额度（按 QPS/次数）</td>
+<td>需 Key</td>
+<td>通用文字/票据识别</td>
+<td>免费档 · API Key · 国内</td>
+<td><a href="https://ai.baidu.com/tech/ocr">AI 开放平台</a> · <a href="https://cloud.baidu.com/doc/OCR/index.html">文档</a></td>
+</tr>
+<tr>
+<td><strong>Unsplash API</strong></td>
+<td>免费 <strong>50 次/小时</strong></td>
+<td>需 Key</td>
+<td>高质量免费可商用图片</td>
+<td>免费档 · API Key · CORS</td>
+<td><a href="https://unsplash.com/developers">开发者</a> · <a href="https://unsplash.com/documentation">文档</a></td>
+</tr>
+<tr>
+<td><strong>Pexels API</strong></td>
+<td>免费 <strong>2 万次/月</strong></td>
+<td>需 Key</td>
+<td>照片/视频素材</td>
+<td>免费档 · API Key · CORS</td>
+<td><a href="https://www.pexels.com/api">API</a> · <a href="https://www.pexels.com/api/documentation">文档</a></td>
+</tr>
+</tbody>
+</table>
+<h4 id="api_1">其他实用免费 API</h4>
+<blockquote>
+<p>最近核验：2026-07-13</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>免费额度</th>
+<th>限制</th>
+<th>标签</th>
+<th>链接（点击跳转）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GitHub API</strong></td>
+<td>未登录 <strong>60 次/小时</strong>，登录 <strong>5000 次/小时</strong></td>
+<td>无需 Key（未登录）</td>
+<td>免费 · 免Key · CORS</td>
+<td><a href="https://docs.github.com/rest">REST 文档</a></td>
+</tr>
+<tr>
+<td><strong>NASA API</strong></td>
+<td>免费，~1000 次/小时</td>
+<td>需 Key（可演示用 DEMO_KEY）</td>
+<td>免费 · API Key</td>
+<td><a href="https://api.nasa.gov">官网</a> · <a href="https://api.nasa.gov/docs">文档</a></td>
+</tr>
+<tr>
+<td><strong>public-apis 仓库</strong></td>
+<td>收录 200+ 免费 API 的持续清单</td>
+<td>社区维护</td>
+<td>免费 · 发现</td>
+<td><a href="https://github.com/public-apis/public-apis">GitHub</a></td>
+</tr>
+<tr>
+<td><strong>IP-API</strong></td>
+<td>非商用 45 次/分钟</td>
+<td>无需 Key</td>
+<td>免费 · 免Key</td>
+<td><a href="https://ip-api.com">官网</a> · <a href="https://ip-api.com/docs">文档</a></td>
+</tr>
+<tr>
+<td><strong>JSONPlaceholder</strong></td>
+<td>完全免费，测试用假数据</td>
+<td>无需 Key</td>
+<td>免费 · 免Key · CORS</td>
+<td><a href="https://jsonplaceholder.typicode.com">官网</a></td>
+</tr>
+<tr>
+<td><strong>DummyJSON</strong></td>
+<td>完全免费，测试用商品/用户数据</td>
+<td>无需 Key</td>
+<td>免费 · 免Key · CORS</td>
+<td><a href="https://dummyjson.com">官网</a></td>
+</tr>
+<tr>
+<td><strong>REST Countries</strong></td>
+<td>完全免费，国家信息</td>
+<td>无需 Key</td>
+<td>免费 · 免Key · CORS</td>
+<td><a href="https://restcountries.com">官网</a> · <a href="https://restcountries.com/#api-endpoints">文档</a></td>
+</tr>
+<tr>
+<td><strong>Open Library</strong></td>
+<td>完全免费，图书元数据</td>
+<td>无需 Key</td>
+<td>免费 · 免Key · CORS</td>
+<td><a href="https://openlibrary.org">官网</a> · <a href="https://openlibrary.org/developers/api">API</a></td>
+</tr>
+<tr>
+<td><strong>Wikidata</strong></td>
+<td>完全免费，知识图谱</td>
+<td>需 UA</td>
+<td>免费 · 免Key</td>
+<td><a href="https://www.wikidata.org">官网</a> · <a href="https://www.wikidata.org/wiki/Special:EntityData">API</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="api_2">三、免费 API 导航（分类速查，点击跳转）</h2>
+<blockquote>
+<p>按用途分类的可点击链接目录，方便快速抵达各平台入口。</p>
+</blockquote>
+<ul>
+<li><strong>大模型 / AI 推理</strong></li>
+<li><a href="https://ai.google.dev">Google Gemini</a> ｜ <a href="https://console.groq.com">Groq</a> ｜ <a href="https://platform.deepseek.com">DeepSeek</a> ｜ <a href="https://platform.openai.com">OpenAI</a> ｜ <a href="https://console.anthropic.com">Anthropic Claude</a> ｜ <a href="https://huggingface.co">Hugging Face</a> ｜ <a href="https://ollama.com">Ollama</a> ｜ <a href="https://open.bigmodel.cn">智谱 BigModel</a> ｜ <a href="https://help.aliyun.com/zh/model-studio/">通义 DashScope</a></li>
+<li><strong>国内合规大模型（数据不出境友好）</strong></li>
+<li><a href="https://open.bigmodel.cn">智谱 BigModel</a> ｜ <a href="https://help.aliyun.com/zh/model-studio/">通义千问</a> ｜ <a href="https://cloud.baidu.com/product/wenxinworkshop">百度千帆</a> ｜ <a href="https://www.xfyun.cn">讯飞星火</a> ｜ <a href="https://www.minimax.io">MiniMax</a> ｜ <a href="https://platform.deepseek.com">DeepSeek</a></li>
+<li><strong>天气</strong></li>
+<li><a href="https://open-meteo.com">Open-Meteo</a> ｜ <a href="https://dev.qweather.com">和风天气</a> ｜ <a href="https://openweathermap.org/api">OpenWeatherMap</a></li>
+<li><strong>地图 / 地理</strong></li>
+<li><a href="https://nominatim.org">Nominatim</a> ｜ <a href="https://lbs.amap.com">高德</a> ｜ <a href="https://lbsyun.baidu.com">百度地图</a> ｜ <a href="https://restcountries.com">REST Countries</a></li>
+<li><strong>翻译</strong></li>
+<li><a href="https://mymemory.translated.net">MyMemory</a> ｜ <a href="https://libretranslate.com">LibreTranslate</a> ｜ <a href="https://www.deepl.com/pro-api">DeepL</a> ｜ <a href="https://fanyi-api.baidu.com">百度翻译</a></li>
+<li><strong>金融 / 行情</strong></li>
+<li><a href="https://tushare.pro">Tushare</a> ｜ <a href="https://www.alphavantage.co">Alpha Vantage</a> ｜ <a href="https://www.coingecko.com/en/api">CoinGecko</a> ｜ <a href="https://exchangerate.host">exchangerate.host</a> ｜ <a href="https://github.com/public-apis/public-apis">腾讯自选股(westock)</a></li>
+<li><strong>OCR / 图像 / 素材</strong></li>
+<li><a href="https://github.com/PaddlePaddle/PaddleOCR">PaddleOCR</a> ｜ <a href="https://ai.baidu.com/tech/ocr">百度 OCR</a> ｜ <a href="https://unsplash.com/developers">Unsplash</a> ｜ <a href="https://www.pexels.com/api">Pexels</a></li>
+<li><strong>学习 / 社区</strong></li>
+<li><a href="https://huggingface.co/learn">Hugging Face Learn</a> ｜ <a href="https://www.deeplearning.ai/short-courses">DeepLearning.AI</a> ｜ <a href="https://modelscope.cn">ModelScope</a> ｜ <a href="https://www.kaggle.com">Kaggle</a> ｜ <a href="https://arxiv.org/list/cs.AI/recent">arXiv cs.AI</a> ｜ <a href="https://www.latent.space">Latent Space</a></li>
+<li><strong>AI 工具发现</strong></li>
+<li><a href="https://futurepedia.io">Futurepedia</a> ｜ <a href="https://www.toolify.ai">Toolify</a> ｜ <a href="https://theresanaiforthat.com">There's An AI For That</a></li>
+<li><strong>免费 API 大全目录</strong></li>
+<li><a href="https://github.com/public-apis/public-apis">public-apis</a> ｜ <a href="https://free-for.dev">free-for.dev</a> ｜ <a href="https://publicapis.dev">public-apis.dev</a> ｜ <a href="https://any-api.com">Any-API</a></li>
+</ul>
+<hr />
+<h2 id="_5">四、每日更新</h2>
+<blockquote>
+<p>本区由「每日 AI 资讯与免费 API 刷新」自动化任务每日联网追加，按日期倒序。手动全量核验日期：2026-07-13。</p>
+</blockquote>
+<!-- DAILY_UPDATE_START -->
+<p>（暂无——自动化任务将在每天运行后在此插入「YYYY-MM-DD 每日简报」。）</p>
+<!-- DAILY_UPDATE_END -->
+
+<hr />
+<blockquote>
+<p><strong>免责声明</strong>：本文档整理于 2026-07-13，免费额度与政策会随厂商调整而变化，生产使用前请以各官方最新文档为准。</p>
+</blockquote>
+<div class="no-result" id="nores">没有匹配的结果，试试别的关键词或清除筛选。</div>
+<div class="foot">本文档由 WorkBuddy 整理 · 免费额度与政策会变动，生产使用前请以官方最新文档为准。</div>
+</main>
+<button class="to-top" id="totop" title="返回顶部">↑</button>
+
+<script>
+(function(){
+  var TAGCLASS = {
+    "免费": "green", "本地": "green", "免Key": "green", "离线": "green",
+    "免费档": "amber", "Freemium": "amber", "API Key": "amber", "登录": "amber",
+    "多模态": "blue", "长上下文": "blue", "低延迟": "blue", "中文强": "blue", "代码强": "blue",
+    "CORS": "purple", "国内": "purple", "发现": "purple"
+  };
+
+  // 1) Render tag pills + collect data-tags for every row that has a 标签 column
+  var tables = document.querySelectorAll(".content table");
+  var tagCount = {};
+  var totalEntries = 0;
+  tables.forEach(function(t){
+    var headers = t.querySelectorAll("thead th");
+    var tagIdx = -1;
+    headers.forEach(function(h, i){ if(h.textContent.trim() === "标签") tagIdx = i; });
+    if(tagIdx < 0) return;
+    t.querySelectorAll("tbody tr").forEach(function(tr){
+      var cell = tr.children[tagIdx];
+      if(!cell) return;
+      var raw = cell.textContent.trim();
+      var tags = raw.split(/[·|]/).map(function(s){return s.trim();}).filter(Boolean);
+      cell.innerHTML = "";
+      tags.forEach(function(tg){
+        var cls = TAGCLASS[tg] || "blue";
+        var span = document.createElement("span");
+        span.className = "tag " + cls;
+        span.textContent = tg;
+        cell.appendChild(span);
+      });
+      tr.setAttribute("data-tags", tags.join("|"));
+      totalEntries++;
+      tags.forEach(function(tg){ tagCount[tg] = (tagCount[tg]||0)+1; });
+    });
+  });
+
+  // 2) Build filter chips
+  var chipbar = document.getElementById("chipbar");
+  var stat = document.getElementById("stat");
+  stat.textContent = "共收录 " + totalEntries + " 个免费资源";
+  var ordered = Object.keys(tagCount).sort(function(a,b){ return tagCount[b]-tagCount[a]; });
+  var active = {};
+  ordered.forEach(function(tg){
+    var chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = tg + ' <span class="cnt">' + tagCount[tg] + '</span>';
+    chip.onclick = function(){
+      if(active[tg]){ delete active[tg]; chip.classList.remove("active"); }
+      else { active[tg] = true; chip.classList.add("active"); }
+      applyFilter();
+    };
+    chipbar.appendChild(chip);
+  });
+
+  // 3) Search + filter
+  var q = document.getElementById("q");
+  var nores = document.getElementById("nores");
+  function applyFilter(){
+    var kw = q.value.trim().toLowerCase();
+    var activeTags = Object.keys(active);
+    var anyTableHasRows = false;
+    tables.forEach(function(t){
+      var headers = t.querySelectorAll("thead th");
+      var hasTag = false;
+      headers.forEach(function(h){ if(h.textContent.trim()==="标签") hasTag = true; });
+      var rows = t.querySelectorAll("tbody tr");
+      var visibleInTable = 0;
+      rows.forEach(function(tr){
+        var tags = (tr.getAttribute("data-tags")||"").split("|");
+        var text = tr.textContent.toLowerCase();
+        var okTag = activeTags.every(function(at){ return tags.indexOf(at) >= 0; });
+        var okKw = !kw || text.indexOf(kw) >= 0;
+        // when chips active but table has no 标签 column, keep it visible
+        if(activeTags.length && !hasTag){ tr.style.display = ""; visibleInTable++; return; }
+        if(okTag && okKw){ tr.style.display = ""; visibleInTable++; }
+        else { tr.style.display = "none"; }
+      });
+      if(visibleInTable > 0) anyTableHasRows = true;
+      // hide table entirely if it has a 标签 column and all its rows are filtered out
+      if(hasTag && visibleInTable === 0 && (activeTags.length || kw)){
+        t.style.display = "none";
+      } else {
+        t.style.display = "";
+      }
+    });
+    nores.style.display = anyTableHasRows ? "none" : "block";
+  }
+  q.addEventListener("input", applyFilter);
+
+  // 4) Copy buttons on code blocks
+  document.querySelectorAll(".content pre").forEach(function(pre){
+    var btn = document.createElement("button");
+    btn.className = "copy-btn";
+    btn.textContent = "复制";
+    btn.onclick = function(){
+      var code = pre.querySelector("code");
+      var txt = code ? code.innerText : pre.innerText;
+      navigator.clipboard.writeText(txt).then(function(){
+        btn.textContent = "已复制";
+        setTimeout(function(){ btn.textContent = "复制"; }, 1200);
+      });
+    };
+    pre.appendChild(btn);
+  });
+
+  // 5) External links open in new tab
+  document.querySelectorAll('.content a[href^="http"]').forEach(function(a){
+    a.target = "_blank"; a.rel = "noopener noreferrer";
+  });
+
+  // 6) Dark mode
+  var html = document.documentElement;
+  var themeBtn = document.getElementById("theme");
+  function setTheme(t){
+    html.setAttribute("data-theme", t);
+    themeBtn.textContent = t === "dark" ? "☀️ 浅色" : "🌙 深色";
+    try { localStorage.setItem("aihub-theme", t); } catch(e){}
+  }
+  try { var saved = localStorage.getItem("aihub-theme"); if(saved) setTheme(saved); } catch(e){}
+  themeBtn.onclick = function(){
+    setTheme(html.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  };
+
+  // 7) Back to top
+  var totop = document.getElementById("totop");
+  window.addEventListener("scroll", function(){
+    totop.classList.toggle("show", window.scrollY > 400);
+  });
+  totop.onclick = function(){ window.scrollTo({top:0, behavior:"smooth"}); };
+})();
+</script>
+</body>
+</html>

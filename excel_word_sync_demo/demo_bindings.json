@@ -1,0 +1,32 @@
+{
+  "bindings": [
+    {
+      "docx": "D:\\桌面\\每日咨询\\excel_word_sync_demo\\demo_报告.docx",
+      "table_index": 0,
+      "excel": "D:\\桌面\\每日咨询\\excel_word_sync_demo\\demo_TB.xlsx",
+      "name": "CPAH_费用明细",
+      "skip_header_rows": 1,
+      "sort": {
+        "column": 1,
+        "direction": "desc",
+        "other_bottom": true,
+        "other_key": "其他"
+      },
+      "column_map": null,
+      "backup": true
+    },
+    {
+      "docx": "D:\\桌面\\每日咨询\\excel_word_sync_demo\\demo_报告.docx",
+      "table_index": 1,
+      "excel": "D:\\桌面\\每日咨询\\excel_word_sync_demo\\demo_TB.xlsx",
+      "name": "CPAH_费用明细",
+      "skip_header_rows": 1,
+      "sort": null,
+      "column_map": [
+        0,
+        3
+      ],
+      "backup": true
+    }
+  ]
+}
